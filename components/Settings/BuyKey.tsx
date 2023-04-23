@@ -8,10 +8,10 @@ import { SupportedExportFormats } from '@/types/export';
 import { SidebarButton } from '../Sidebar/SidebarButton';
 
 interface Props {
-  onImport: (data: SupportedExportFormats) => void;
+  url?: string;
 }
 
-export const BuyKey: FC<Props> = ({ onImport }) => {
+export const BuyKey: FC<Props> = ({ url }) => {
   const { t } = useTranslation('sidebar');
   return (
     <>
@@ -20,7 +20,7 @@ export const BuyKey: FC<Props> = ({ onImport }) => {
         icon={<IconKey size={18} />}
         onClick={() => {
           const link = document.createElement('a');
-          link.href = 'https://hello-ai.anzz.top/home/buy.html';
+          link.href = url || 'https://hello-ai.anzz.top/';
           link.target = '_blank';
           link.click();
         }}

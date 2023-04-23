@@ -57,7 +57,7 @@ export const ChatbarSettings = () => {
         onClick={() => setIsSettingDialog(true)}
       />
 
-      <BuyKey />
+      <BuyKey url="https://hello-ai.anzz.top/home/buy.html" />
 
       {!serverSideApiKeyIsSet ? (
         <Key apiKey={apiKey} onApiKeyChange={handleApiKeyChange} />
