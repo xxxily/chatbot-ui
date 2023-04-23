@@ -13,6 +13,7 @@ import { SidebarButton } from '../../Sidebar/SidebarButton';
 import ChatbarContext from '../Chatbar.context';
 import { ClearConversations } from './ClearConversations';
 import { PluginKeys } from './PluginKeys';
+import { BuyKey } from '@/components/Settings/BuyKey';
 
 export const ChatbarSettings = () => {
   const { t } = useTranslation('sidebar');
@@ -55,6 +56,8 @@ export const ChatbarSettings = () => {
         icon={<IconSettings size={18} />}
         onClick={() => setIsSettingDialog(true)}
       />
+
+      <BuyKey />
 
       {!serverSideApiKeyIsSet ? (
         <Key apiKey={apiKey} onApiKeyChange={handleApiKeyChange} />

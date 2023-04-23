@@ -360,7 +360,7 @@ const Home = ({
       }}
     >
       <Head>
-        <title>Chatbot UI</title>
+        <title><a href="https://hello-ai.anzz.top" target="_blank">Hello-AI</a></title>
         <meta name="description" content="ChatGPT but better." />
         <meta
           name="viewport"
