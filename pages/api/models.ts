@@ -17,6 +17,10 @@ const handler = async (req: Request): Promise<Response> => {
       url = `${OPENAI_API_HOST}/openai/deployments?api-version=${OPENAI_API_VERSION}`;
     }
 
+    // if (process.env.DEBUG) {
+    //   console.log('key:', key ? key : process.env.OPENAI_API_KEY)
+    // }
+
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',

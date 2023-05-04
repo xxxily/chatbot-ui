@@ -59,9 +59,11 @@ export const ChatbarSettings = () => {
 
       <BuyKey url="https://hello-ai.anzz.top/home/buy.html" />
 
-      {!serverSideApiKeyIsSet ? (
+      {/* 不管服务端有没有设置，都允许用户配置自己的apikey */}
+      {/* {!serverSideApiKeyIsSet ? (
         <Key apiKey={apiKey} onApiKeyChange={handleApiKeyChange} />
-      ) : null}
+      ) : null} */}
+      <Key apiKey={apiKey} onApiKeyChange={handleApiKeyChange} />
 
       {!serverSidePluginKeysSet ? <PluginKeys /> : null}
 

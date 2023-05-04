@@ -16,6 +16,8 @@ export const config = {
 const handler = async (req: Request): Promise<Response> => {
   try {
     const { model, messages, key, prompt, temperature } = (await req.json()) as ChatBody;
+    const apikey = key ? key : process.env.OPENAI_API_KEY;
+    const isPrivateKey = apikey !== process.env.OPENAI_API_KEY;
 
     await init((imports) => WebAssembly.instantiate(wasm, imports));
     const encoding = new Tiktoken(
@@ -27,6 +29,11 @@ const handler = async (req: Request): Promise<Response> => {
     let promptToSend = prompt;
     if (!promptToSend) {
       promptToSend = DEFAULT_SYSTEM_PROMPT;
+    }
+
+    /* 公key强制使用默认的系统提示 */
+    if (!isPrivateKey) {
+      promptToSend = DEFAULT_SYSTEM_PROMPT || ''
     }
 
     let temperatureToUse = temperature;
@@ -51,6 +58,24 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     encoding.free();
+
+    /* 防止服务侧的apikey被过渡消耗 */
+    if (!isPrivateKey && messagesToSend) {
+      const lastMessage = messagesToSend[messagesToSend.length - 1];
+      const maxLen = parseInt(process.env.MAX_CHARACTER_SIZE as string) || 200;
+
+      if (lastMessage && lastMessage.role === 'user' && lastMessage.content.length > maxLen) {
+        return new Response(`输入的内容长度超过了 ${maxLen} 个字符，请缩短内容长度后再发送。  \n\n[使用私人的apikey不受此限制](https://hello-ai.anzz.top/home/buy.html)`);
+      }
+    }
+
+    if (process.env.DEBUG) {
+      console.log({
+        messages: messagesToSend,
+        apikey,
+        isPrivateKey
+      });
+    }
 
     const stream = await OpenAIStream(model, promptToSend, temperatureToUse, key, messagesToSend);
 
