@@ -13,6 +13,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
 
 import { getEndpoint } from '@/utils/app/api';
+import { copyRightNodeHandler, copyRightReg } from '@/utils/app/copyRight';
 import {
   saveConversation,
   saveConversations,
@@ -29,10 +30,10 @@ import Spinner from '../Spinner';
 import { ChatInput } from './ChatInput';
 import { ChatLoader } from './ChatLoader';
 import { ErrorMessageDiv } from './ErrorMessageDiv';
+import { MemoizedChatMessage } from './MemoizedChatMessage';
 import { ModelSelect } from './ModelSelect';
 import { SystemPrompt } from './SystemPrompt';
 import { TemperatureSlider } from './Temperature';
-import { MemoizedChatMessage } from './MemoizedChatMessage';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -72,6 +73,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     async (message: Message, deleteCount = 0, plugin: Plugin | null = null) => {
       if (selectedConversation) {
         let updatedConversation: Conversation;
+
         if (deleteCount) {
           const updatedMessages = [...selectedConversation.messages];
           for (let i = 0; i < deleteCount; i++) {
@@ -87,19 +89,32 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             messages: [...selectedConversation.messages, message],
           };
         }
+
         homeDispatch({
           field: 'selectedConversation',
           value: updatedConversation,
         });
         homeDispatch({ field: 'loading', value: true });
         homeDispatch({ field: 'messageIsStreaming', value: true });
+
         const chatBody: ChatBody = {
           model: updatedConversation.model,
-          messages: updatedConversation.messages,
+          messages: JSON.parse(JSON.stringify(updatedConversation.messages)),
           key: apiKey,
           prompt: updatedConversation.prompt,
           temperature: updatedConversation.temperature,
         };
+
+        chatBody.messages = chatBody.messages.map((item) => {
+          if (item.role === 'assistant') {
+            return {
+              ...item,
+              content: item.content.replace(copyRightReg(), ''),
+            };
+          }
+          return item;
+        });
+
         const endpoint = getEndpoint(plugin);
         let body;
         if (!plugin) {
@@ -316,6 +331,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   // }, [currentMessage]);
 
   useEffect(() => {
+    document.querySelectorAll('.chat-main-box p').forEach((el) => {
+      copyRightNodeHandler(el as HTMLElement);
+    });
+  }, [currentMessage]);
+
+  useEffect(() => {
     throttledScrollDown();
     selectedConversation &&
       setCurrentMessage(
@@ -352,7 +373,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       {!(apiKey || serverSideApiKeyIsSet) ? (
         <div className="mx-auto flex h-full w-[300px] flex-col justify-center space-y-6 sm:w-[600px]">
           <div className="text-center text-4xl font-bold text-black dark:text-white">
-            欢迎访问 <a href="https://hello-ai.anzz.top" target="_blank">Hello-AI</a>
+            欢迎访问{' '}
+            <a href="https://hello-ai.anzz.top" target="_blank">
+              Hello-AI
+            </a>
           </div>
           {/* <div className="text-center text-lg text-black dark:text-white">
             <div className="mb-8">{`Chatbot UI is an open source clone of OpenAI's ChatGPT UI.`}</div>
@@ -405,7 +429,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                         <Spinner size="16px" className="mx-auto" />
                       </div>
                     ) : (
-                      <a href="https://hello-ai.anzz.top" target="_blank">Hello-AI</a>
+                      <a href="https://hello-ai.anzz.top" target="_blank">
+                        Hello-AI
+                      </a>
                     )}
                   </div>
 

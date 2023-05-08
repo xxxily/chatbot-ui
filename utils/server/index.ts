@@ -36,10 +36,8 @@ export const OpenAIStream = async (
   }
 
   const apikey = key ? key : process.env.OPENAI_API_KEY
-
-  // if (process.env.DEBUG) {
-  //   console.log('key:', apikey, messages)
-  // }
+  const isPrivateKey = apikey !== process.env.OPENAI_API_KEY;
+  const maxTokens = isPrivateKey ? 0 : parseInt(process.env.OPENAI_MAX_TOKENS as string) || 0;
 
   const res = await fetch(url, {
     headers: {
@@ -64,7 +62,13 @@ export const OpenAIStream = async (
         },
         ...messages,
       ],
-      max_tokens: 1000,
+      
+      // 不定义max_tokens输出的效果更好，服务器如果定义了max_tokens，则也会进行限制
+      // max_tokens: maxTokens,
+      ...(maxTokens ? {
+        max_tokens: maxTokens
+      } : {}),
+
       temperature: temperature,
       stream: true,
     }),
@@ -99,12 +103,17 @@ export const OpenAIStream = async (
           try {
             const json = JSON.parse(data);
             if (json.choices[0].finish_reason != null) {
+              if (!isPrivateKey && process.env.POWERED_BY_INFO) {
+                controller.enqueue(encoder.encode(`\n\n=== ${process.env.POWERED_BY_INFO} ===`));
+              }
+
               controller.close();
               return;
             }
             const text = json.choices[0].delta.content;
             const queue = encoder.encode(text);
             controller.enqueue(queue);
+
           } catch (e) {
             controller.error(e);
           }

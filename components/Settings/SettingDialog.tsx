@@ -1,4 +1,5 @@
 import { FC, useContext, useEffect, useReducer, useRef } from 'react';
+import { IconFileExport, IconSettings } from '@tabler/icons-react';
 
 import { useTranslation } from 'next-i18next';
 
@@ -9,6 +10,15 @@ import { getSettings, saveSettings } from '@/utils/app/settings';
 import { Settings } from '@/types/settings';
 
 import HomeContext from '@/pages/api/home/home.context';
+
+import { ClearConversations } from '@/components/Chatbar/components/ClearConversations';
+import ChatbarContext from '@/components/Chatbar/Chatbar.context';
+
+import { Import } from '@/components/Settings/Import';
+import { SidebarButton } from '@/components/Sidebar/SidebarButton';
+import { Key } from '@/components/Settings/Key';
+import { BuyKey } from '@/components/Settings/BuyKey';
+import { PluginKeys } from '@/components/Chatbar/components/PluginKeys';
 
 interface Props {
   open: boolean;
@@ -21,7 +31,25 @@ export const SettingDialog: FC<Props> = ({ open, onClose }) => {
   const { state, dispatch } = useCreateReducer<Settings>({
     initialState: settings,
   });
-  const { dispatch: homeDispatch } = useContext(HomeContext);
+  const { 
+    state: {
+      apiKey,
+      lightMode,
+      serverSideApiKeyIsSet,
+      serverSidePluginKeysSet,
+      collapseMenu,
+      conversations,
+    },
+    dispatch: homeDispatch
+   } = useContext(HomeContext);
+
+  const {
+    handleClearConversations,
+    handleImportConversations,
+    handleExportData,
+    handleApiKeyChange,
+  } = useContext(ChatbarContext);
+
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -71,6 +99,26 @@ export const SettingDialog: FC<Props> = ({ open, onClose }) => {
             <div className="text-lg pb-4 font-bold text-black dark:text-neutral-200">
               {t('Settings')}
             </div>
+
+            {conversations.length > 0 ? (
+              <ClearConversations onClearConversations={handleClearConversations} />
+            ) : null}
+
+            <Import onImport={handleImportConversations} />
+
+            <SidebarButton
+              text={t('Export data')}
+              icon={<IconFileExport size={18} />}
+              onClick={() => handleExportData()}
+            />
+
+            <BuyKey url="https://hello-ai.anzz.top/home/buy.html" />
+
+            <Key apiKey={apiKey} onApiKeyChange={handleApiKeyChange} />
+
+            {/* {!serverSidePluginKeysSet ? <PluginKeys /> : null} */}
+
+            <br />
 
             <div className="text-sm font-bold mb-2 text-black dark:text-neutral-200">
               {t('Theme')}

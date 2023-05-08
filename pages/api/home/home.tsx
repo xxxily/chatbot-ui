@@ -381,7 +381,6 @@ const Home = ({
             `,
           }}
         />
-
       </Head>
       {selectedConversation && (
         <main
@@ -397,7 +396,7 @@ const Home = ({
           <div className="flex h-full w-full pt-[48px] sm:pt-0">
             <Chatbar />
 
-            <div className="flex flex-1">
+            <div className="chat-main-box flex flex-1">
               <Chat stopConversationRef={stopConversationRef} />
             </div>
 
@@ -421,11 +420,17 @@ export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
 
   let serverSidePluginKeysSet = false;
 
+  const disabledGooglePlugins = process.env.GOOGLE_PLUGINS !== 'true';
   const googleApiKey = process.env.GOOGLE_API_KEY;
   const googleCSEId = process.env.GOOGLE_CSE_ID;
 
-  if (googleApiKey && googleCSEId) {
+  if (googleApiKey && googleCSEId || disabledGooglePlugins) {
     serverSidePluginKeysSet = true;
+  }
+
+  let collapseMenu = true;
+  if (process.env.COLLAPSE_MENU === 'true') {
+    collapseMenu = true;
   }
 
   return {
@@ -433,6 +438,7 @@ export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
       serverSideApiKeyIsSet: !!process.env.OPENAI_API_KEY,
       defaultModelId,
       serverSidePluginKeysSet,
+      collapseMenu,
       ...(await serverSideTranslations(locale ?? 'en', [
         'common',
         'chat',

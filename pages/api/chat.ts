@@ -73,6 +73,7 @@ const handler = async (req: Request): Promise<Response> => {
       console.log({
         messages: messagesToSend,
         apikey,
+        tokenCount,
         isPrivateKey
       });
     }
