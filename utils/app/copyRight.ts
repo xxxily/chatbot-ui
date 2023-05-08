@@ -1,7 +1,7 @@
 /* 严格匹配 */
 export const copyRightReg = () => /\n\n===\s[\s\S]+\s===$/gm;
 /* 松散匹配 */
-export const copyRightReg1 = () => /[\n\t]{0,4}===\s[\s\S]+\s===$/gm;
+export const copyRightReg1 = () => /===\s[\s\S]+\s===$/gm;
 
 export function copyRightNodeHandler(el: HTMLElement) {
   if (el.nodeName === 'P' && copyRightReg1().test(el.innerText)) {

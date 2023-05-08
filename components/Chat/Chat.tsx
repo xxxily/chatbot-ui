@@ -13,12 +13,12 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
 
 import { getEndpoint } from '@/utils/app/api';
-import { copyRightNodeHandler, copyRightReg } from '@/utils/app/copyRight';
 import {
   saveConversation,
   saveConversations,
   updateConversation,
 } from '@/utils/app/conversation';
+import { copyRightNodeHandler, copyRightReg } from '@/utils/app/copyRight';
 import { throttle } from '@/utils/data/throttle';
 
 import { ChatBody, Conversation, Message } from '@/types/chat';
@@ -334,7 +334,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     document.querySelectorAll('.chat-main-box p').forEach((el) => {
       copyRightNodeHandler(el as HTMLElement);
     });
-  }, [currentMessage]);
+  }, [
+    currentMessage,
+    messagesEndRef,
+    selectedConversation,
+    throttledScrollDown,
+  ]);
 
   useEffect(() => {
     throttledScrollDown();
