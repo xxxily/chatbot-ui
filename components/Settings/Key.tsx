@@ -60,7 +60,7 @@ export const Key: FC<Props> = ({ apiKey, onApiKeyChange }) => {
             e.stopPropagation();
             handleUpdateKey(newKey);
 
-            if (!isApiKey(newKey)) {
+            if (newKey && !isApiKey(newKey)) {
               setIsChanging(true);
             }
 
