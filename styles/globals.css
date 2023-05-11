@@ -41,3 +41,20 @@ html {
 pre:has(div.codeblock) {
   padding: 0;
 }
+
+.chat-main-box .copy-right,
+.chat-main-box .copy-right a {
+  opacity: 1;
+  font-size: 10px;
+  color: #e2e3e5;
+}
+
+main.dark .chat-main-box .copy-right,
+main.dark .chat-main-box .copy-right a {
+  color: #575965;
+}
+
+.chat-main-box .copy-right a:hover,
+main.dark .chat-main-box .copy-right a:hover {
+  color: #10b981;
+}

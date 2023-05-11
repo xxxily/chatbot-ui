@@ -6,8 +6,9 @@ export const copyRightReg1 = () => /===\s[\s\S]+\s===$/gm;
 export function copyRightNodeHandler(el: HTMLElement) {
   if (el.nodeName === 'P' && copyRightReg1().test(el.innerText)) {
     el.classList.add('copy-right');
-    el.style.opacity = '0.1';
-    el.style.fontSize = '10px';
+    
+    // el.style.opacity = '0.1';
+    // el.style.fontSize = '10px';
   }
 }
 
@@ -27,12 +28,6 @@ export function copyRightHandler() {
   const config = { childList: true, subtree: true };
 
   observer.observe(targetElement, config);
-
-  // setTimeout(() => {
-  //   document.querySelectorAll('p').forEach((el) => {
-  //     newNodeHandler(el);
-  //   });
-  // }, 100);
 }
 
 export function copyRightInit() {
