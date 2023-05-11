@@ -104,8 +104,13 @@ export const OpenAIStream = async (
           try {
             const json = JSON.parse(data);
             if (json.choices[0].finish_reason != null) {
-              if (!_isPrivateKey && process.env.POWERED_BY_INFO) {
-                controller.enqueue(encoder.encode(`\n\n=== ${process.env.POWERED_BY_INFO} ===`));
+              if (!_isPrivateKey) {
+                if (process.env.ALLOW_CONTINUOUS_CHAT === 'false') {
+                  const notAllowContinuousChatTips = process.env.NOT_ALLOW_CONTINUOUS_CHAT_TIPS || '提示：资源受限，连续对话模式已关闭。';
+                  controller.enqueue(encoder.encode(`\n\n=== ${notAllowContinuousChatTips} ===`));
+                } else if (process.env.POWERED_BY_INFO) {
+                  controller.enqueue(encoder.encode(`\n\n=== ${process.env.POWERED_BY_INFO} ===`));
+                }
               }
 
               controller.close();

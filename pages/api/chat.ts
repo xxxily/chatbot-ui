@@ -64,9 +64,22 @@ const handler = async (req: Request): Promise<Response> => {
     if (!_isPrivateKey && messagesToSend) {
       const lastMessage = messagesToSend[messagesToSend.length - 1];
       const maxLen = parseInt(process.env.MAX_CHARACTER_SIZE as string) || 200;
+      const maxChatTimes = parseInt(process.env.OPENAI_MAX_CHAT_TIMES as string) || 0;
+      const notAllowContinuousChat = process.env.ALLOW_CONTINUOUS_CHAT === 'false'
 
       if (lastMessage && lastMessage.role === 'user' && lastMessage.content.length > maxLen) {
-        return new Response(`输入的内容长度超过了 ${maxLen} 个字符，请缩短内容长度后再发送。  \n\n[使用私人的apikey不受此限制](https://hello-ai.anzz.top/home/buy.html)`);
+        const maxLenTips = process.env.MAX_TOKENS_TIPS || `输入的内容长度超过了 ${maxLen} 个字符，请缩短内容长度后再发送。`
+        return new Response(`${maxLenTips}`);
+      }
+
+      if (notAllowContinuousChat) {
+        const userMessages = messagesToSend.filter(message => message.role === 'user')
+        messagesToSend = [userMessages[userMessages.length - 1]];
+      } else {
+        if (maxChatTimes > 0 && messagesToSend.filter(message => message.role === 'assistant').length >= maxChatTimes) {
+          const maxChatTimesTips = process.env.MAX_CHAT_TIMES_TIPS || `连续对话次数已超限，请新建聊天再进行对话。`
+          return new Response(`${maxChatTimesTips}`);
+        }
       }
     }
 
