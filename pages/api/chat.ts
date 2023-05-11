@@ -68,7 +68,7 @@ const handler = async (req: Request): Promise<Response> => {
       const notAllowContinuousChat = process.env.ALLOW_CONTINUOUS_CHAT === 'false'
 
       if (lastMessage && lastMessage.role === 'user' && lastMessage.content.length > maxLen) {
-        const maxLenTips = process.env.MAX_TOKENS_TIPS || `输入的内容长度超过了 ${maxLen} 个字符，请缩短内容长度后再发送。`
+        const maxLenTips = process.env.MAX_CHARACTER_SIZE_TIPS || `输入的内容长度超过了 ${maxLen} 个字符，请缩短内容长度后再发送。`
         return new Response(`${maxLenTips}`);
       }
 
