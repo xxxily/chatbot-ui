@@ -261,19 +261,25 @@ const Home = ({
 
     const apiKey = localStorage.getItem('apiKey');
 
-    if (serverSideApiKeyIsSet) {
-      dispatch({ field: 'apiKey', value: '' });
+    /* 移除客户端的apiKey */
+    // if (serverSideApiKeyIsSet) {
+    //   dispatch({ field: 'apiKey', value: '' });
+    //   localStorage.removeItem('apiKey');
+    // }
 
-      localStorage.removeItem('apiKey');
-    } else if (apiKey) {
+    if (apiKey) {
       dispatch({ field: 'apiKey', value: apiKey });
     }
 
     const pluginKeys = localStorage.getItem('pluginKeys');
-    if (serverSidePluginKeysSet) {
-      dispatch({ field: 'pluginKeys', value: [] });
-      localStorage.removeItem('pluginKeys');
-    } else if (pluginKeys) {
+    
+    /* 移除客户端的pluginKeys */
+    // if (serverSidePluginKeysSet) {
+    //   dispatch({ field: 'pluginKeys', value: [] });
+    //   localStorage.removeItem('pluginKeys');
+    // }
+    
+    if (pluginKeys) {
       dispatch({ field: 'pluginKeys', value: pluginKeys });
     }
 
@@ -436,6 +442,7 @@ export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
   return {
     props: {
       serverSideApiKeyIsSet: !!process.env.OPENAI_API_KEY,
+      isPrivateShare: process.env.PRIVATE_SHARE === 'true',
       defaultModelId,
       serverSidePluginKeysSet,
       collapseMenu,

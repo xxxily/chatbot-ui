@@ -1,5 +1,6 @@
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
+import { getOpenApiKey, isPrivateKey } from '@/utils/server/apikey';
 
 import { ChatBody, Message } from '@/types/chat';
 
@@ -16,8 +17,8 @@ export const config = {
 const handler = async (req: Request): Promise<Response> => {
   try {
     const { model, messages, key, prompt, temperature } = (await req.json()) as ChatBody;
-    const apikey = key ? key : process.env.OPENAI_API_KEY;
-    const isPrivateKey = apikey !== process.env.OPENAI_API_KEY;
+    const apikey = key ? key : getOpenApiKey();
+    const _isPrivateKey = isPrivateKey(apikey);
 
     await init((imports) => WebAssembly.instantiate(wasm, imports));
     const encoding = new Tiktoken(
@@ -32,7 +33,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     /* 公key强制使用默认的系统提示 */
-    if (!isPrivateKey) {
+    if (!_isPrivateKey) {
       promptToSend = DEFAULT_SYSTEM_PROMPT || ''
     }
 
@@ -60,7 +61,7 @@ const handler = async (req: Request): Promise<Response> => {
     encoding.free();
 
     /* 防止服务侧的apikey被过渡消耗 */
-    if (!isPrivateKey && messagesToSend) {
+    if (!_isPrivateKey && messagesToSend) {
       const lastMessage = messagesToSend[messagesToSend.length - 1];
       const maxLen = parseInt(process.env.MAX_CHARACTER_SIZE as string) || 200;
 
@@ -74,7 +75,7 @@ const handler = async (req: Request): Promise<Response> => {
         messages: messagesToSend,
         apikey,
         tokenCount,
-        isPrivateKey
+        isPrivateKey: _isPrivateKey,
       });
     }
 

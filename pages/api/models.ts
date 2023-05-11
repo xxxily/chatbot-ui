@@ -1,6 +1,6 @@
 import { OPENAI_API_HOST, OPENAI_API_TYPE, OPENAI_API_VERSION, OPENAI_ORGANIZATION } from '@/utils/app/const';
-
 import { OpenAIModel, OpenAIModelID, OpenAIModels } from '@/types/openai';
+import { getOpenApiKey } from '@/utils/server/apikey';
 
 export const config = {
   runtime: 'edge',
@@ -17,18 +17,16 @@ const handler = async (req: Request): Promise<Response> => {
       url = `${OPENAI_API_HOST}/openai/deployments?api-version=${OPENAI_API_VERSION}`;
     }
 
-    // if (process.env.DEBUG) {
-    //   console.log('key:', key ? key : process.env.OPENAI_API_KEY)
-    // }
+    const apikey = key ? key : getOpenApiKey();
 
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
         ...(OPENAI_API_TYPE === 'openai' && {
-          Authorization: `Bearer ${key ? key : process.env.OPENAI_API_KEY}`
+          Authorization: `Bearer ${apikey}`
         }),
         ...(OPENAI_API_TYPE === 'azure' && {
-          'api-key': `${key ? key : process.env.OPENAI_API_KEY}`
+          'api-key': `${apikey}`
         }),
         ...((OPENAI_API_TYPE === 'openai' && OPENAI_ORGANIZATION) && {
           'OpenAI-Organization': OPENAI_ORGANIZATION,

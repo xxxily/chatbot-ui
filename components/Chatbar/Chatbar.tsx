@@ -48,9 +48,18 @@ export const Chatbar = () => {
 
   const handleApiKeyChange = useCallback(
     (apiKey: string) => {
-      homeDispatch({ field: 'apiKey', value: apiKey });
+      const isApiKey = /^sk-[a-zA-Z0-9_]{32,64}$/.test(apiKey);
 
-      localStorage.setItem('apiKey', apiKey);
+      if (apiKey === '' || isApiKey) {
+        homeDispatch({ field: 'apiKey', value: apiKey });
+        localStorage.setItem('apiKey', apiKey);
+      }
+
+      /* 提示异常 */
+      if (apiKey && !isApiKey) {
+        console.log(`提供的ApiKey不正确：${apiKey}`);
+        alert('您提供的ApiKey不正确');
+      }
     },
     [homeDispatch],
   );

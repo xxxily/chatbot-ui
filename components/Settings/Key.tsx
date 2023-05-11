@@ -42,6 +42,7 @@ export const Key: FC<Props> = ({ apiKey, onApiKeyChange }) => {
         ref={inputRef}
         className="ml-2 h-[20px] flex-1 overflow-hidden overflow-ellipsis border-b border-neutral-400 bg-transparent pr-1 text-[12.5px] text-left text-white outline-none focus:border-neutral-100"
         type="password"
+        autoComplete="off"
         value={newKey}
         onChange={(e) => setNewKey(e.target.value)}
         onKeyDown={handleEnterDown}
@@ -63,8 +64,16 @@ export const Key: FC<Props> = ({ apiKey, onApiKeyChange }) => {
           size={18}
           onClick={(e) => {
             e.stopPropagation();
-            setIsChanging(false);
-            setNewKey(apiKey);
+            // setIsChanging(false);
+            // setNewKey(apiKey);
+
+            /* 点击关闭按钮时，清空输入框，清空本地存储的apiKey */
+            handleUpdateKey('');
+            setNewKey('');
+            localStorage.removeItem('apiKey');
+            
+            /* 让输入框保持打开状态 */
+            setIsChanging(true);
           }}
         />
       </div>

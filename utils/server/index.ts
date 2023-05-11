@@ -1,5 +1,6 @@
 import { Message } from '@/types/chat';
 import { OpenAIModel } from '@/types/openai';
+import { getOpenApiKey, isPrivateKey } from './apikey';
 
 import { AZURE_DEPLOYMENT_ID, OPENAI_API_HOST, OPENAI_API_TYPE, OPENAI_API_VERSION, OPENAI_ORGANIZATION } from '../app/const';
 
@@ -35,9 +36,9 @@ export const OpenAIStream = async (
     url = `${OPENAI_API_HOST}/openai/deployments/${AZURE_DEPLOYMENT_ID}/chat/completions?api-version=${OPENAI_API_VERSION}`;
   }
 
-  const apikey = key ? key : process.env.OPENAI_API_KEY
-  const isPrivateKey = apikey !== process.env.OPENAI_API_KEY;
-  const maxTokens = isPrivateKey ? 0 : parseInt(process.env.OPENAI_MAX_TOKENS as string) || 0;
+  const apikey = key ? key : getOpenApiKey()
+  const _isPrivateKey = isPrivateKey(apikey);
+  const maxTokens = _isPrivateKey ? 0 : parseInt(process.env.OPENAI_MAX_TOKENS as string) || 0;
 
   const res = await fetch(url, {
     headers: {
@@ -62,7 +63,7 @@ export const OpenAIStream = async (
         },
         ...messages,
       ],
-      
+
       // 不定义max_tokens输出的效果更好，服务器如果定义了max_tokens，则也会进行限制
       // max_tokens: maxTokens,
       ...(maxTokens ? {
@@ -103,7 +104,7 @@ export const OpenAIStream = async (
           try {
             const json = JSON.parse(data);
             if (json.choices[0].finish_reason != null) {
-              if (!isPrivateKey && process.env.POWERED_BY_INFO) {
+              if (!_isPrivateKey && process.env.POWERED_BY_INFO) {
                 controller.enqueue(encoder.encode(`\n\n=== ${process.env.POWERED_BY_INFO} ===`));
               }
 
