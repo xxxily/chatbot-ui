@@ -13,6 +13,7 @@ interface Props {
 export const Key: FC<Props> = ({ apiKey, onApiKeyChange }) => {
   const { t } = useTranslation('sidebar');
   const [isChanging, setIsChanging] = useState(false);
+  const [isPassword, setIsPassword] = useState(false);
   const [newKey, setNewKey] = useState(apiKey);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -22,6 +23,8 @@ export const Key: FC<Props> = ({ apiKey, onApiKeyChange }) => {
       handleUpdateKey(newKey);
     }
   };
+
+  const isApiKey = (apiKey: string) => /^sk-[a-zA-Z0-9_]{32,64}$/.test(apiKey);
 
   const handleUpdateKey = (newKey: string) => {
     onApiKeyChange(newKey.trim());
@@ -41,7 +44,7 @@ export const Key: FC<Props> = ({ apiKey, onApiKeyChange }) => {
       <input
         ref={inputRef}
         className="ml-2 h-[20px] flex-1 overflow-hidden overflow-ellipsis border-b border-neutral-400 bg-transparent pr-1 text-[12.5px] text-left text-white outline-none focus:border-neutral-100"
-        type="password"
+        type={isPassword ? 'password' : 'text'}
         autoComplete="off"
         value={newKey}
         onChange={(e) => setNewKey(e.target.value)}
@@ -56,6 +59,13 @@ export const Key: FC<Props> = ({ apiKey, onApiKeyChange }) => {
           onClick={(e) => {
             e.stopPropagation();
             handleUpdateKey(newKey);
+
+            if (!isApiKey(newKey)) {
+              setIsChanging(true);
+            }
+
+            /* 防止触发浏览器的自动保存 */
+            setIsPassword(false);
           }}
         />
 
@@ -71,7 +81,10 @@ export const Key: FC<Props> = ({ apiKey, onApiKeyChange }) => {
             handleUpdateKey('');
             setNewKey('');
             localStorage.removeItem('apiKey');
-            
+
+            /* 防止触发浏览器的自动保存 */
+            setIsPassword(false);
+
             /* 让输入框保持打开状态 */
             setIsChanging(true);
           }}
@@ -82,7 +95,13 @@ export const Key: FC<Props> = ({ apiKey, onApiKeyChange }) => {
     <SidebarButton
       text={t('OpenAI API Key')}
       icon={<IconKey size={18} />}
-      onClick={() => setIsChanging(true)}
+      onClick={() => {
+        if (isApiKey(localStorage.getItem('apiKey') || '')) {
+          setIsPassword(true);
+        }
+
+        setIsChanging(true);
+      }}
     />
   );
 };
