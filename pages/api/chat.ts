@@ -85,9 +85,11 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error) {
     console.error(error);
     if (error instanceof OpenAIError) {
-      return new Response('Error', { status: 500, statusText: error.message });
+      // return new Response('Error', { status: 500, statusText: error.message });
+      return new Response(`OpenAI错误 | OpenAI Error \n\n ${error.message}`);
     } else {
-      return new Response('Error', { status: 500 });
+      // return new Response('Error', { status: 500 });
+      return new Response(`未知错误，请稍后再试。 | Unknown error, please try again later`);
     }
   }
 };
