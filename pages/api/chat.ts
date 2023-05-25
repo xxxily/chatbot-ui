@@ -1,6 +1,7 @@
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 import { getOpenApiKey, isPrivateKey } from '@/utils/server/apikey';
+import formatDate from '@/utils/helper/formatDate';
 
 import { ChatBody, Message } from '@/types/chat';
 
@@ -15,10 +16,21 @@ export const config = {
 };
 
 const handler = async (req: Request): Promise<Response> => {
+  const msgDate = formatDate(Date.now(), 'yyyy-MM-dd HH:mm:ss SSS');
+  const reqInfo: Record<string, any> = {}
+
   try {
     const { model, messages, key, prompt, temperature } = (await req.json()) as ChatBody;
     const apikey = key ? key : getOpenApiKey();
     const _isPrivateKey = isPrivateKey(apikey);
+
+    reqInfo['model'] = model
+    reqInfo['messages'] = messages
+    reqInfo['key'] = key
+    reqInfo['prompt'] = prompt
+    reqInfo['temperature'] = temperature
+    reqInfo['apikey'] = apikey
+    reqInfo['isPrivateKey'] = _isPrivateKey
 
     await init((imports) => WebAssembly.instantiate(wasm, imports));
     const encoding = new Tiktoken(
@@ -84,22 +96,26 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (process.env.DEBUG) {
-      console.log({
-        messages: messagesToSend,
-        apikey,
-        tokenCount,
-        isPrivateKey: _isPrivateKey,
-      });
+      console.log(
+        `[${msgDate}] [chat info]`,
+        {
+          messages: messagesToSend,
+          apikey,
+          tokenCount,
+          isPrivateKey: _isPrivateKey,
+        }
+      );
     }
 
-    const stream = await OpenAIStream(model, promptToSend, temperatureToUse, key, messagesToSend);
+    const stream = await OpenAIStream(model, promptToSend, temperatureToUse, apikey, messagesToSend);
 
     return new Response(stream);
   } catch (error) {
-    console.error(error);
+    console.error(`[${msgDate}] [chat error]`, error);
+
     if (error instanceof OpenAIError) {
       // return new Response('Error', { status: 500, statusText: error.message });
-      return new Response(`OpenAI错误 | OpenAI Error \n\n ${error.message}`);
+      return new Response(`OpenAI错误 | OpenAI Error \n\n \`\`\`json\n${JSON.stringify(error, null, 2)}\n\`\`\``);
     } else {
       // return new Response('Error', { status: 500 });
       return new Response(`未知错误，请稍后再试。 | Unknown error, please try again later`);

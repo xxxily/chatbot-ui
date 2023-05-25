@@ -41,8 +41,7 @@ const handler = async (req: Request): Promise<Response> => {
       });
     } else if (response.status !== 200) {
       console.error(
-        `OpenAI API returned an error ${
-          response.status
+        `OpenAI API returned an error ${response.status
         }: ${await response.text()}`,
       );
       throw new Error('OpenAI API returned an error');
@@ -66,7 +65,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     return new Response(JSON.stringify(models), { status: 200 });
   } catch (error) {
-    console.error(error);
+    console.error('[models error]', error);
     return new Response('Error', { status: 500 });
   }
 };
