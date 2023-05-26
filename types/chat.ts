@@ -13,6 +13,9 @@ export interface ChatBody {
   key: string;
   prompt: string;
   temperature: number;
+  id?: string;
+  /* 支持任意参数 */
+  [key: string]: any;
 }
 
 export interface Conversation {

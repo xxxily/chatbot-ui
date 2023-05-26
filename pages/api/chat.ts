@@ -19,11 +19,15 @@ const handler = async (req: Request): Promise<Response> => {
   const msgDate = formatDate(Date.now(), 'yyyy-MM-dd HH:mm:ss SSS');
   const reqInfo: Record<string, any> = {}
 
+  const realIp = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '0.0.0.0'
+  // console.log(`[${msgDate}] [chat request]`, realIp)
+
   try {
     const { model, messages, key, prompt, temperature } = (await req.json()) as ChatBody;
     const apikey = key ? key : getOpenApiKey();
     const _isPrivateKey = isPrivateKey(apikey);
 
+    reqInfo['realIp'] = realIp
     reqInfo['model'] = model
     reqInfo['messages'] = messages
     reqInfo['key'] = key
@@ -102,6 +106,7 @@ const handler = async (req: Request): Promise<Response> => {
           messages: messagesToSend,
           apikey,
           tokenCount,
+          realIp,
           isPrivateKey: _isPrivateKey,
         }
       );

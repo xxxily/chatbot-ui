@@ -13,6 +13,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
 
 import { getEndpoint } from '@/utils/app/api';
+import { getDeviceId } from '@/utils/app/devices';
 import {
   saveConversation,
   saveConversations,
@@ -59,6 +60,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
+  const urlParams = new URLSearchParams(window.location.search);
   const [currentMessage, setCurrentMessage] = useState<Message>();
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showSettings, setShowSettings] = useState<boolean>(false);
@@ -96,13 +98,15 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         });
         homeDispatch({ field: 'loading', value: true });
         homeDispatch({ field: 'messageIsStreaming', value: true });
-
+        
         const chatBody: ChatBody = {
+          uuid: updatedConversation.id || '',
           model: updatedConversation.model,
           messages: JSON.parse(JSON.stringify(updatedConversation.messages)),
-          key: apiKey,
+          key: urlParams.get('key') || apiKey,
           prompt: updatedConversation.prompt,
           temperature: updatedConversation.temperature,
+          deviceId: getDeviceId(),
         };
 
         chatBody.messages = chatBody.messages.map((item) => {
@@ -114,6 +118,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           }
           return item;
         });
+
+        if(urlParams.get('shareCode')){
+          chatBody.shareCode = urlParams.get('shareCode') || '';
+        }
 
         const endpoint = getEndpoint(plugin);
         let body;
