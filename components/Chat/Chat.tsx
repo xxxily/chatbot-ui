@@ -119,6 +119,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           return item;
         });
 
+        /* 移除未知错误的消息 */
+        chatBody.messages = chatBody.messages.filter((item) => {
+          return !item.content.includes('未知错误，请稍后再试。 | Unknown error, please try again later');
+        });
+
         if(urlParams.get('shareCode')){
           chatBody.shareCode = urlParams.get('shareCode') || '';
         }
