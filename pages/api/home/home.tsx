@@ -22,7 +22,7 @@ import {
   updateConversation,
 } from '@/utils/app/conversation';
 import { saveFolders } from '@/utils/app/folders';
-import { savePrompts } from '@/utils/app/prompts';
+import { getDefaultPrompts, savePrompts } from '@/utils/app/prompts';
 import { getSettings } from '@/utils/app/settings';
 
 import { Conversation } from '@/types/chat';
@@ -272,13 +272,13 @@ const Home = ({
     }
 
     const pluginKeys = localStorage.getItem('pluginKeys');
-    
+
     /* 移除客户端的pluginKeys */
     // if (serverSidePluginKeysSet) {
     //   dispatch({ field: 'pluginKeys', value: [] });
     //   localStorage.removeItem('pluginKeys');
     // }
-    
+
     if (pluginKeys) {
       dispatch({ field: 'pluginKeys', value: pluginKeys });
     }
@@ -303,9 +303,11 @@ const Home = ({
       dispatch({ field: 'folders', value: JSON.parse(folders) });
     }
 
-    const prompts = localStorage.getItem('prompts');
-    if (prompts) {
-      dispatch({ field: 'prompts', value: JSON.parse(prompts) });
+    const parsedPrompts: Prompt[] = JSON.parse(localStorage.getItem('prompts') || '[]');
+    if (parsedPrompts && parsedPrompts.length) {
+      dispatch({ field: 'prompts', value: parsedPrompts });
+    } else {
+      dispatch({ field: 'prompts', value: getDefaultPrompts() });
     }
 
     const conversationHistory = localStorage.getItem('conversationHistory');
@@ -430,7 +432,7 @@ export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
   const googleApiKey = process.env.GOOGLE_API_KEY;
   const googleCSEId = process.env.GOOGLE_CSE_ID;
 
-  if (googleApiKey && googleCSEId || disabledGooglePlugins) {
+  if ((googleApiKey && googleCSEId) || disabledGooglePlugins) {
     serverSidePluginKeysSet = true;
   }
 

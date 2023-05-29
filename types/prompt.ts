@@ -5,6 +5,6 @@ export interface Prompt {
   name: string;
   description: string;
   content: string;
-  model: OpenAIModel;
-  folderId: string | null;
+  model?: OpenAIModel;
+  folderId?: string | null;
 }
