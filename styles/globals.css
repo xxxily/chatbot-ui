@@ -58,3 +58,8 @@ main.dark .chat-main-box .copy-right a {
 main.dark .chat-main-box .copy-right a:hover {
   color: #10b981;
 }
+
+/* 减少版权信息的显示 */
+.chat-main-box .copy-right:not(:first-child) {
+  display: none;
+}
