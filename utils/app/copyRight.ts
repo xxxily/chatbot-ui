@@ -9,6 +9,17 @@ export function copyRightNodeHandler(el: HTMLElement) {
     
     // el.style.opacity = '0.1';
     // el.style.fontSize = '10px';
+
+    /* 给最后一个copyRight添加单独的类名 */
+    const copyRightEls =  document.querySelectorAll('.copy-right')
+    if (copyRightEls.length) {
+      copyRightEls.forEach((copyRightEl) => {
+        copyRightEl.classList.remove('last-copy-right');
+      });
+
+      const lastCopyRightEl = copyRightEls[copyRightEls.length - 1];
+      lastCopyRightEl.classList.add('last-copy-right');
+    }
   }
 }
 

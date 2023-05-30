@@ -60,6 +60,9 @@ main.dark .chat-main-box .copy-right a:hover {
 }
 
 /* 减少版权信息的显示 */
-.chat-main-box .copy-right:not(:first-child) {
+.chat-main-box .copy-right {
   display: none;
+}
+.chat-main-box .last-copy-right {
+  display: block;
 }
