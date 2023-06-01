@@ -5,6 +5,7 @@ const apiToken = process.env.STRAPI_TOKEN
 
 export async function saveChat(data: ChatBody) {
   var myHeaders = new Headers();
+  myHeaders.append("Content-Type", "application/json");
   myHeaders.append("Authorization", `Bearer ${apiToken}`);
 
   if (!apiUrl || !apiToken) {
@@ -24,11 +25,13 @@ export async function saveChat(data: ChatBody) {
     apikey: data.key || data.apikey,
     deviceId: data.deviceId || '',
     isPrivateKey: data.isPrivateKey || null,
-    data: JSON.stringify(data.messages),
+    data: data.messages,
   }
 
+  // console.log('----------[saveChat][result]----------', result)
+
   if (data.uuid) {
-    const res = (await fetch(`${apiUrl}/api/chats?filters[uuid][$eq]=${data.uuid}`, {
+    const res = await (await fetch(`${apiUrl}/chats?filters[uuid][$eq]=${data.uuid}`, {
       method: 'GET',
       headers: myHeaders
     })).json() as any
@@ -36,21 +39,29 @@ export async function saveChat(data: ChatBody) {
     /* 更新数据 */
     if (res.data && res.data.length) {
       const id = res.data[0].id
-      
-      await fetch(`${apiUrl}/api/chats/${id}`, {
+
+      const updateRes = await (await fetch(`${apiUrl}/chats/${id}`, {
         method: 'PUT',
         headers: myHeaders,
-        body: JSON.stringify(result),
-      })
+        body: JSON.stringify({
+          data: result
+        }),
+      })).json() as any
+
+      // console.log('----------[saveChat][updateRes]----------', updateRes)
 
       return
     }
   }
 
   /* 新增数据 */
-  await fetch(`${apiUrl}/api/chats`, {
+  const res = await (await fetch(`${apiUrl}/chats`, {
     method: 'POST',
     headers: myHeaders,
-    body: JSON.stringify(result),
-  })
+    body: JSON.stringify({
+      data: result,
+    }),
+  })).json() as any
+
+  // console.log('----------[saveChat][res]----------', res)
 }
