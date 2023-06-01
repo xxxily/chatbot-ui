@@ -1,6 +1,7 @@
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 import { getOpenApiKey, isPrivateKey } from '@/utils/server/apikey';
+import { saveChat } from '@/utils/data/chatHelper';
 import formatDate from '@/utils/helper/formatDate';
 
 import { ChatBody, Message } from '@/types/chat';
@@ -23,10 +24,12 @@ const handler = async (req: Request): Promise<Response> => {
   // console.log(`[${msgDate}] [chat request]`, realIp)
 
   try {
-    const { model, messages, key, prompt, temperature } = (await req.json()) as ChatBody;
+    const { model, messages, key, prompt, temperature, uuid, deviceId } = (await req.json()) as ChatBody;
     const apikey = key ? key : getOpenApiKey();
     const _isPrivateKey = isPrivateKey(apikey);
 
+    reqInfo['uuid'] = uuid
+    reqInfo['deviceId'] = deviceId
     reqInfo['realIp'] = realIp
     reqInfo['model'] = model
     reqInfo['messages'] = messages
@@ -113,6 +116,12 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const stream = await OpenAIStream(model, promptToSend, temperatureToUse, apikey, messagesToSend);
+
+    try {
+      saveChat(reqInfo as ChatBody)
+    } catch (err) {
+      console.error('[saveChat][error]', err)
+    }
 
     return new Response(stream);
   } catch (error) {
