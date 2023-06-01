@@ -24,7 +24,7 @@ export async function saveChat(data: ChatBody) {
     ip: data.realIp || data.id || '',
     apikey: data.key || data.apikey,
     deviceId: data.deviceId || '',
-    isPrivateKey: data.isPrivateKey || null,
+    isPrivateKey: data.isPrivateKey || false,
     data: data.messages,
   }
 

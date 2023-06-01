@@ -16,6 +16,46 @@ export const config = {
   runtime: 'edge',
 };
 
+async function openAIStreamHandler(stream: ReadableStream, reqInfo: Record<string, any>) {
+  reqInfo.messages = reqInfo.messages || []
+  const decoder = new TextDecoder();
+  const reader = stream.getReader();
+  let totalData = '';
+
+  async function readStream() {
+    const { done, value } = await reader.read();
+    if (done) {
+      console.log('openAIStreamHandler done', totalData);
+      return;
+    }
+
+    totalData += decoder.decode(value);
+    await readStream();
+  }
+
+  async function saveChatInfo() {
+    reqInfo.messages.push({
+      role: 'assistant',
+      content: totalData,
+    })
+
+    try {
+      await saveChat(reqInfo as ChatBody)
+    } catch (err) {
+      console.error('[saveChat][error]', err)
+    }
+  }
+
+  await readStream().catch(async (e) => {
+    console.log('[openAIStreamHandler][error]', e);
+    await saveChatInfo()
+  });
+
+  await saveChatInfo()
+
+  return totalData;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   const msgDate = formatDate(Date.now(), 'yyyy-MM-dd HH:mm:ss SSS');
   const reqInfo: Record<string, any> = {}
@@ -117,13 +157,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     const stream = await OpenAIStream(model, promptToSend, temperatureToUse, apikey, messagesToSend);
 
-    try {
-      saveChat(reqInfo as ChatBody)
-    } catch (err) {
-      console.error('[saveChat][error]', err)
-    }
+    /* 对stream进行分流处理，避免在读取stream时，相互影响，造成响应异常 */
+    const [stream1, stream2] = stream.tee();
 
-    return new Response(stream);
+    openAIStreamHandler(stream1, reqInfo)
+
+    return new Response(stream2);
   } catch (error) {
     console.error(`[${msgDate}] [chat error]`, error);
 
