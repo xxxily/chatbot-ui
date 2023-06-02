@@ -26,6 +26,8 @@ export async function saveChat(data: ChatBody) {
     deviceId: data.deviceId || '',
     isPrivateKey: data.isPrivateKey || false,
     data: data.messages,
+    userAgent: data.userAgent || '',
+    referer: data.referer || '',
   }
 
   // console.log('----------[saveChat][result]----------', result)

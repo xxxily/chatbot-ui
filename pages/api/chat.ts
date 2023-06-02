@@ -64,8 +64,11 @@ const handler = async (req: Request): Promise<Response> => {
   const msgDate = formatDate(Date.now(), 'yyyy-MM-dd HH:mm:ss SSS');
   const reqInfo: Record<string, any> = {}
 
+  
+  const userAgent = req.headers.get('user-agent')
+  const referer = req.headers.get('referer')
   const realIp = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '0.0.0.0'
-  // console.log(`[${msgDate}] [chat request]`, realIp)
+  // console.log(`[${msgDate}] [chat request]`, realIp, req.headers)
 
   try {
     const { model, messages, key, prompt, temperature, uuid, deviceId } = (await req.json()) as ChatBody;
@@ -82,6 +85,8 @@ const handler = async (req: Request): Promise<Response> => {
     reqInfo['temperature'] = temperature
     reqInfo['apikey'] = apikey
     reqInfo['isPrivateKey'] = _isPrivateKey
+    reqInfo['userAgent'] = userAgent
+    reqInfo['referer'] = referer
 
     await init((imports) => WebAssembly.instantiate(wasm, imports));
     const encoding = new Tiktoken(
