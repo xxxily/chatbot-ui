@@ -24,12 +24,16 @@ async function openAIStreamHandler(stream: ReadableStream, reqInfo: Record<strin
 
   async function readStream() {
     const { done, value } = await reader.read();
+    
+    if (value){
+      totalData += decoder.decode(value);
+    }
+    
     if (done) {
-      console.log('openAIStreamHandler done', totalData);
+      // console.log('openAIStreamHandler done', totalData);
       return;
     }
 
-    totalData += decoder.decode(value);
     await readStream();
   }
 
