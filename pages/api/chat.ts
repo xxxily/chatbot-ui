@@ -164,6 +164,11 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    /* 强制使用最新的turbo模型，注意：如果不强制指定则可能因为前端缓存而使用到其它旧的模型 */
+    if(model && model.id && model.id === 'gpt-3.5-turbo') {
+      model.id = 'gpt-3.5-turbo-0613'
+    }
+
     const stream = await OpenAIStream(model, promptToSend, temperatureToUse, apikey, messagesToSend);
 
     /* 对stream进行分流处理，避免在读取stream时，相互影响，造成响应异常 */
